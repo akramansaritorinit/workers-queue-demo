@@ -1,0 +1,11 @@
+name = "queue-demo"
+main = "src/index.ts"
+compatibility_date = "2023-02-03"
+
+[[queues.producers]]
+ queue = "touchless"
+ binding = "touchless"
+
+[[queues.consumers]] 
+ queue = "touchless"
+ max_batch_timeout = 5
