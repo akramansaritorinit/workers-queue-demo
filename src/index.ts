@@ -11,16 +11,14 @@ type Enpoints = {
 export default {
     async fetch(request: Request, env: Env): Promise<Response> {
         // For multiple endpoints at array at once
-
-        // let enpoints: Enpoints[] = await request.json();
-        // const batch: MessageSendRequest[] = enpoints.map((value) => ({
-        //     body: value,
-        // }));
-        // await env.touchless.sendBatch(batch);
-
+        let enpoints: Enpoints[] = await request.json();
+        const batch: MessageSendRequest[] = enpoints.map((value) => ({
+            body: value,
+        }));
+        await env.touchless.sendBatch(batch);
         // For single endpoint object
-        let log = await request.json();
-        await env.touchless.send(log);
+        // let log = await request.json();
+        // await env.touchless.send(log);
         return new Response("Success!");
     },
     async queue(
@@ -30,9 +28,9 @@ export default {
     ): Promise<void> {
         for (const message of batch.messages) {
             const MAX_RETRIES = 3;
-            let retryCount = 0;
+            let retryCount = 1;
             console.log("Enpoint: ", message.body.endpoint);
-            while (retryCount < MAX_RETRIES) {
+            while (retryCount <= MAX_RETRIES) {
                 try {
                     const response = await fetch(
                         message.body.endpoint,
@@ -47,16 +45,14 @@ export default {
                         console.log("Success Yo!");
                         console.log("Result", await response.json());
                         break;
+                    } else {
+                        throw new Error("Something went wrong!");
                     }
-                    //else part is not working is logging unlimited
-                    // else {
-                    //     console.log("Error");
-                    //     console.log("Result", await response.json());
-                    // }
                 } catch (error) {
-                    retryCount++;
-                    console.log(`Error retrying:${retryCount}/${MAX_RETRIES}`);
+                    console.log(error);
+                    console.log(`Retrying : ${retryCount}/${MAX_RETRIES}`);
                     await new Promise((resolve) => setTimeout(resolve, 500));
+                    retryCount++;
                 }
             }
         }
