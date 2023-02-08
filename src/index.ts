@@ -16,9 +16,11 @@ export default {
             body: value,
         }));
         await env.touchless.sendBatch(batch);
+
         // For single endpoint object
         // let log = await request.json();
         // await env.touchless.send(log);
+
         return new Response("Success!");
     },
     async queue(
